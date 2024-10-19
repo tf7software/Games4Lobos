@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LupineVault</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff;
+      color: #000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    a {
+      display: block;
+      padding: 10px;
+      margin: 5px;
+      background-color: orange;
+      color: black;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    a:hover {
+      background-color: darkorange;
+    }
+
+    iframe {
+      width: 100%;
+      height: 80vh;
+      border: none;
+      margin-top: 20px;
+    }
+
+    .dark-mode {
+      background-color: #000;
+      color: #fff;
+    }
+
+    .dark-mode a {
+      color: #fff;
+    }
+
+    #fullscreenButton {
+      display: inline-block;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    #fullscreenButton:hover {
+      background-color: darkorange;
+    }
+  </style>
+</head>
+<body>
+  <h1>LupineVault</h1>
+  <button id="toggleMode">Toggle Dark Mode</button>
+  <div id="gameList"></div>
+  <iframe id="gameFrame" src="" title="Game Viewer"></iframe>
+  <button id="fullscreenButton" style="display: none;">Fullscreen</button>
+
+  <script>
+    const repoUrl = 'https://api.github.com/repos/tf7software/Games4Lobos/contents/games';
+    const gameList = document.getElementById('gameList');
+    const gameFrame = document.getElementById('gameFrame');
+    const fullscreenButton = document.getElementById('fullscreenButton');
+    const toggleModeButton = document.getElementById('toggleMode');
+    let isDarkMode = false;
+
+    toggleModeButton.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      isDarkMode = !isDarkMode;
+    });
+
+    async function fetchDirectories() {
+      try {
+        const response = await fetch(repoUrl);
+        const data = await response.json();
+
+        // Check if the data contains directories
+        data.forEach(item => {
+          if (item.type === 'dir') {
+            const gameLink = document.createElement('a');
+            gameLink.href = '#';
+            gameLink.textContent = item.name;
+            gameLink.addEventListener('click', (e) => {
+              e.preventDefault();
+              loadGame(item.name);
+            });
+            gameList.appendChild(gameLink);
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching directories:', error);
+      }
+    }
+
+    function loadGame(directoryName) {
+      const gameUrl = `https://tf7software.github.io/Games4Lobos/games/${directoryName}/index.html`;
+      gameFrame.src = gameUrl;
+      fullscreenButton.style.display = 'inline-block';
+    }
+
+    // Fullscreen functionality
+    fullscreenButton.addEventListener('click', () => {
+      if (gameFrame.requestFullscreen) {
+        gameFrame.requestFullscreen();
+      } else if (gameFrame.mozRequestFullScreen) { // Firefox
+        gameFrame.mozRequestFullScreen();
+      } else if (gameFrame.webkitRequestFullscreen) { // Chrome, Safari, and Opera
+        gameFrame.webkitRequestFullscreen();
+      } else if (gameFrame.msRequestFullscreen) { // IE/Edge
+        gameFrame.msRequestFullscreen();
+      }
+    });
+
+    // Fetch and display the game directories on page load
+    fetchDirectories();
+  </script>
+</body>
+</html>
